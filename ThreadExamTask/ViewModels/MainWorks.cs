@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -27,18 +28,38 @@ namespace ThreadExamTask.ViewModels
 
         public void Scan()
         {
-            foreach (var drive in drives)
-            {
-                foreach (var directory in drive.RootDirectory.GetDirectories())
-                {
-                    var lastdirectory = SearchRecursively(directory.Name);
+            //foreach (var drive in drives)
+            //{
+            //    foreach (var directory in drive.RootDirectory.GetDirectories())
+            //    {
+            //        var lastdirectory = SearchRecursively(directory.FullName);
+            //
+            //        foreach (var file in lastdirectory.GetFiles())
+            //        {
+            //            //if (File.ReadAllText(file.Name).Contains())
+            //        }
+            //    }
+            //}
 
-                    foreach (var file in lastdirectory.GetFiles())
-                    {
-                        //if (File.ReadAllText(file.Name).Contains())
-                    }
+            #region test
+
+            string path = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+
+            string allText = "";
+
+            foreach (var item in )
+            {
+                foreach (var file in Directory.GetFiles(path))
+                {
+                    allText = File.ReadAllText(path);
+                    if (allText.Contains()) ;
                 }
             }
+
+            
+
+
+            #endregion
         }
 
         private DirectoryInfo SearchRecursively(string directoryname)
