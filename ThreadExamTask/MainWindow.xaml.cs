@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ThreadExamTask.ViewModels;
 
 namespace ThreadExamTask
 {
@@ -23,6 +24,8 @@ namespace ThreadExamTask
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContext = new MainWindowViewModel();
         }
     }
 }
