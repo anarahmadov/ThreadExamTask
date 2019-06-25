@@ -26,7 +26,7 @@
                    Margin="-550 0 0 0"/>
 
             <WrapPanel Height="165">
-                <TextBox Width="450" Height="150" Margin="20 0 0 0"/>
+                <TextBox Width="450" Height="150" Margin="20 0 0 0" Opacity="0.7"/>
                 <Button Width="50" Height="150" Content="DONE" Margin="10 0 0 0"/>
                 <Button Width="150" Height="50" Margin="80 0 0 0"
                         Content="Choose file" FontSize="20" 
@@ -60,7 +60,7 @@
 
             <WrapPanel Height="40" Margin="0 10 0 0"
                        HorizontalAlignment="Center">
-                <ProgressBar Width="780" Height="40"/>
+                <ProgressBar Width="780" Height="40" Opacity="0.7"/>
             </WrapPanel>
         </StackPanel>
     </Grid>

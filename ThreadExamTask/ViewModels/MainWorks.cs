@@ -13,21 +13,31 @@ namespace ThreadExamTask.ViewModels
     {
         public List<string> RestrictedWords { get; set; }
         private DriveInfo[] drives = DriveInfo.GetDrives();
+        string specialFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp";
+
+        public MainWorks()
+        {
+            Directory.CreateDirectory(specialFolder);
+        }
 
         public void PutRestrictedWordsFrom(string filename)
         {
-            RestrictedWords = new List<string>();
-
-            var arr = File.ReadAllText(filename).Split(' ');
-
-            for (int i = 0; i < arr.Count(); i++)
+            if (filename != null)
             {
-                RestrictedWords.Add(arr[i]);
+                RestrictedWords = new List<string>();
+
+                var arr = File.ReadAllText(filename).Split(' ');
+
+                for (int i = 0; i < arr.Count(); i++)
+                {
+                    RestrictedWords.Add(arr[i]);
+                }
             }
         }
 
         public void Scan()
         {
+            #region Real code
             //foreach (var drive in drives)
             //{
             //    foreach (var directory in drive.RootDirectory.GetDirectories())
@@ -41,40 +51,55 @@ namespace ThreadExamTask.ViewModels
             //    }
             //}
 
+            #endregion
+
             #region test
 
-            string path = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+            string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\Desktop\test";
+
+            var StartDirectory = new DirectoryInfo(path);
 
             string allText = "";
 
-            foreach (var item in )
+            foreach (var directory in StartDirectory.GetDirectories())
             {
-                foreach (var file in Directory.GetFiles(path))
+                var lastdirectory = SearchRecursively(directory.FullName);
+
+                foreach (var file in lastdirectory.GetFiles())
                 {
-                    allText = File.ReadAllText(path);
-                    if (allText.Contains()) ;
+                    allText = File.ReadAllText(file.FullName);
+
+                    for (int i = 0; i < RestrictedWords.Count; i++)
+                    {
+                        if (allText.Contains(RestrictedWords[i]))
+                        {
+                            CopyToSpecialFolder(file.FullName);
+                            break;
+                        }
+                    }
                 }
             }
-
-            
-
 
             #endregion
         }
 
         private DirectoryInfo SearchRecursively(string directoryname)
         {
-            if (Directory.GetDirectories(directoryname) != null)
+            var lastDirectory = new DirectoryInfo(directoryname);
+
+            if (Directory.GetDirectories(directoryname).Count() != 0)
             {
-                SearchRecursively(directoryname);
+                directoryname = lastDirectory.GetDirectories()[0].
+                    FullName;
+                return SearchRecursively(directoryname);
             }
 
-            return Directory.CreateDirectory(directoryname);
+            return lastDirectory;
         }
 
         public void CopyToSpecialFolder(string filename)
         {
-
+            File.Copy(filename, specialFolder + $@"\{new FileInfo(filename).Name}");
         }
     }
 }
