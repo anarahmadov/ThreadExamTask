@@ -25,6 +25,7 @@ namespace ThreadExamTask
                 MessageBox.Show("Application is already running", "Warning");
                 App.Current.Shutdown();
             }
+
         }
     }
 }
