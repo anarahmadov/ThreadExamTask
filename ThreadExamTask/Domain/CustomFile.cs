@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 
 namespace ThreadExamTask.Domain
 {
+    [Serializable]
     public class CustomFile 
     {
-
+        public DateTime CreationTime { get; set; }
+        public long Lenght { get; set; }
+        public string Fullname { get; set; }
 
     }
 }

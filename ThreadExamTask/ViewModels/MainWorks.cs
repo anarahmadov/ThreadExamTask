@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Security;
-using System.Security.AccessControl;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using ThreadExamTask.Domain;
 
 namespace ThreadExamTask.ViewModels
 {
@@ -17,11 +13,15 @@ namespace ThreadExamTask.ViewModels
         public List<string> RestrictedWords { get; set; }
         private DriveInfo[] drives = DriveInfo.GetDrives();
 
+        public List<CustomFile> FileDetailsForReport { get; set; }
+
         string specialFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp";
         string reportfile = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report\report.json";
         string reportFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report";
 
-        static string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}";
+        //static string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}";
+
+        string path = @"\\STHQ01DC01\dfr$\Ahma_pf84\Desktop\practice";
 
         public MainWorks()
         {
@@ -115,7 +115,7 @@ namespace ThreadExamTask.ViewModels
                             try
                             {
                                 allText = File.ReadAllText(filename);
-                                MessageBox.Show(allText);
+                                //MessageBox.Show(allText);
                             }
                             catch (Exception)
                             {
@@ -158,11 +158,15 @@ namespace ThreadExamTask.ViewModels
                 {
                     var twopart = fileFullPath.Split('.');
 
-                    var filePath = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")}).{twopart[1]}";
+                    var filePath = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")}).{twopart.Last()}";
                     File.Copy(filename, filePath);
 
-                    var filePath2 = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")})(Copy).{twopart[1]}";
+                    var filePath2 = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")})(Copy).{twopart.Last()}";
+
+                    // copy file with restricted words changes
                     CopyToSpecialFolderChanged(filePath, filePath2);
+
+                    // copy file details to report file
                     WriteToReportFile(filePath);
                 }
                 else
@@ -171,7 +175,11 @@ namespace ThreadExamTask.ViewModels
                     File.Copy(filename, filePath);
 
                     var filePath2 = $"{filename}({DateTime.UtcNow.ToString("ss.fff")})(Copy)";
+
+                    // copy file with restricted words changes
                     CopyToSpecialFolderChanged(filePath, filePath2);
+
+                    // copy file details to report file
                     WriteToReportFile(filePath);
                 }
             }
@@ -215,10 +223,33 @@ namespace ThreadExamTask.ViewModels
         }
 
         public void WriteToReportFile(string filename)
-        {
+        {           
             var fi = new FileInfo(filename);
 
-            //File.AppendAllText(reportfile, JsonConvert.SerializeObject(fi));
+            FileDetailsForReport = new List<CustomFile>();
+
+            FileDetailsForReport.Add(new CustomFile()
+            {
+                CreationTime = fi.CreationTime,
+                Fullname = fi.FullName,
+                Lenght = fi.Length
+            });
+
+            var file = new CustomFile()
+            {
+                CreationTime = fi.CreationTime,
+                Lenght = fi.Length,
+                Fullname = fi.FullName
+            };
+
+            try
+            {
+                File.AppendAllText(reportfile, JsonConvert.SerializeObject(file));
+            }
+            catch (Exception)
+            {
+                
+            }
 
             //File.WriteAllText(reportfile, content);
         }
