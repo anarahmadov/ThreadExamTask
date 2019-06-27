@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Security;
 using System.Security.AccessControl;
+using Newtonsoft.Json;
 
 namespace ThreadExamTask.ViewModels
 {
@@ -17,11 +18,16 @@ namespace ThreadExamTask.ViewModels
         private DriveInfo[] drives = DriveInfo.GetDrives();
 
         string specialFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp";
+        string reportfile = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report\report.json";
+        string reportFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report";
+
         static string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}";
 
         public MainWorks()
         {
+            Directory.CreateDirectory(reportFolder);
             Directory.CreateDirectory(specialFolder);
+            File.Create(reportfile);
         }
 
         public void PutRestrictedWordsFrom(string filename)
@@ -109,6 +115,7 @@ namespace ThreadExamTask.ViewModels
                             try
                             {
                                 allText = File.ReadAllText(filename);
+                                MessageBox.Show(allText);
                             }
                             catch (Exception)
                             {
@@ -134,12 +141,13 @@ namespace ThreadExamTask.ViewModels
 
         public void CopyToSpecialFolder(string filename)
         {
-            var SentFile = new FileInfo(filename);
+            var SentFile = new FileInfo(filename);           
 
             if (!SentFile.Exists)
             {
                 File.Copy(filename, specialFolder + $@"\{SentFile.Name}");
                 CopyToSpecialFolderChanged(filename, specialFolder + $@"\{SentFile.Name}");
+                WriteToReportFile(specialFolder + $@"\{SentFile.Name}");
             }
             else
             {
@@ -155,6 +163,7 @@ namespace ThreadExamTask.ViewModels
 
                     var filePath2 = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")})(Copy).{twopart[1]}";
                     CopyToSpecialFolderChanged(filePath, filePath2);
+                    WriteToReportFile(filePath);
                 }
                 else
                 {
@@ -163,6 +172,7 @@ namespace ThreadExamTask.ViewModels
 
                     var filePath2 = $"{filename}({DateTime.UtcNow.ToString("ss.fff")})(Copy)";
                     CopyToSpecialFolderChanged(filePath, filePath2);
+                    WriteToReportFile(filePath);
                 }
             }
         }
@@ -187,7 +197,7 @@ namespace ThreadExamTask.ViewModels
             }
 
             stream.Close();
-                        
+
         }
 
         public bool IsAccessToFolder(string dirPath)
@@ -202,6 +212,15 @@ namespace ThreadExamTask.ViewModels
             {
                 return false;
             }
+        }
+
+        public void WriteToReportFile(string filename)
+        {
+            var fi = new FileInfo(filename);
+
+            //File.AppendAllText(reportfile, JsonConvert.SerializeObject(fi));
+
+            //File.WriteAllText(reportfile, content);
         }
     }
 }
