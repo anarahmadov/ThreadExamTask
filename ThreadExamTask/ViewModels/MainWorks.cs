@@ -154,7 +154,7 @@ namespace ThreadExamTask.ViewModels
                     File.Copy(filename, filePath);
 
                     var filePath2 = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")})(Copy).{twopart[1]}";
-                    CopyToSpecialFolderChanged(filename, filePath2);
+                    CopyToSpecialFolderChanged(filePath, filePath2);
                 }
                 else
                 {
@@ -162,7 +162,7 @@ namespace ThreadExamTask.ViewModels
                     File.Copy(filename, filePath);
 
                     var filePath2 = $"{filename}({DateTime.UtcNow.ToString("ss.fff")})(Copy)";
-                    CopyToSpecialFolderChanged(filename, filePath2);
+                    CopyToSpecialFolderChanged(filePath, filePath2);
                 }
             }
         }
@@ -171,7 +171,7 @@ namespace ThreadExamTask.ViewModels
         {
             var fileContent = File.ReadAllText(currentFileName).Split(' ');
 
-            var SentFile = new FileInfo(currentFileName);
+            //var SentFile = new FileInfo(currentFileName);
 
             StreamWriter stream = new StreamWriter(newFileName);
 
@@ -181,13 +181,13 @@ namespace ThreadExamTask.ViewModels
                 {
                     if (fileContent[i] == RestrictedWords[j])
                     {
-                        //File.WriteAllText(newFileName, File.ReadAllText(newFileName).Replace($"{fileContent[i]}", "*******"));
                         stream.Write(File.ReadAllText(currentFileName).Replace($"{fileContent[i]}", "*******"));
                     }
                 }
             }
 
             stream.Close();
+                        
         }
 
         public bool IsAccessToFolder(string dirPath)

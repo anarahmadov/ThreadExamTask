@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using ThreadExamTask.Commands;
 
@@ -24,18 +25,18 @@ namespace ThreadExamTask.ViewModels
                 mainWorks.PutRestrictedWordsFrom(ChoosenFileName);
                 IsChooseFile = true;
             }
-
         });
 
         public MainCommand StartCommand => new MainCommand(body =>
         {
             if (IsChooseFile)
             {
-                Thread tr = new Thread(mainWorks.ScanRecursively);
+                //CancellationTokenSource tokenSource = new CancellationTokenSource();
+                //CancellationToken token = tokenSource.Token;
 
-                tr.Name = "ScanThread";
+                Task task = new Task(mainWorks.ScanRecursively);
 
-                tr.Start();
+                task.Start();
             }
             else MessageBox.Show("There are no restricted words");
         });
