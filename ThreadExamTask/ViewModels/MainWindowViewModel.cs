@@ -14,6 +14,9 @@ namespace ThreadExamTask.ViewModels
         private MainWorks mainWorks = new MainWorks();
         public bool IsChooseFile { get; set; }
 
+        // delete image state
+        public int State { get; set; }
+
         public MainCommand ChooseFileCommand => new MainCommand(body =>
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -25,6 +28,8 @@ namespace ThreadExamTask.ViewModels
                 mainWorks.PutRestrictedWordsFrom(ChoosenFileName);
                 IsChooseFile = true;
             }
+
+            State = 1;
         });
 
         public MainCommand StartCommand => new MainCommand(body =>
@@ -34,9 +39,9 @@ namespace ThreadExamTask.ViewModels
                 //CancellationTokenSource tokenSource = new CancellationTokenSource();
                 //CancellationToken token = tokenSource.Token;
 
-                Task task = new Task(mainWorks.ScanRecursively);
+                //Task task = new Task(mainWorks.ScanRecursively);
 
-                task.Start();
+                Task.Run(() => mainWorks.ScanRecursively(mainWorks.path));
             }
             else MessageBox.Show("There are no restricted words");
         });

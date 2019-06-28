@@ -16,18 +16,20 @@ namespace ThreadExamTask.ViewModels
         public List<CustomFile> FileDetailsForReport { get; set; }
 
         string specialFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp";
-        string reportfile = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report\report.json";
+        string reportFile = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report\report.json";
         string reportFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report";
 
-        //static string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}";
+        //public string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}";
+        //public string path = @"\\STHQ01DC01\dfr$\Ahma_pf84\Desktop\practice";
 
-        string path = @"\\STHQ01DC01\dfr$\Ahma_pf84\Desktop\practice";
+        public string path = @"C:\\Users\Anar\Desktop\test";
 
         public MainWorks()
         {
             Directory.CreateDirectory(reportFolder);
             Directory.CreateDirectory(specialFolder);
-            File.Create(reportfile);
+            File.Create(reportFile);
+            FileDetailsForReport = new List<CustomFile>();
         }
 
         public void PutRestrictedWordsFrom(string filename)
@@ -45,7 +47,7 @@ namespace ThreadExamTask.ViewModels
             }
         }
 
-        public void ScanRecursively()
+        public void ScanRecursively(string currentPath)
         {
             string allText = "";
 
@@ -98,12 +100,12 @@ namespace ThreadExamTask.ViewModels
 
             #region test
 
-            foreach (string dirPath in Directory.GetDirectories(path))
+            foreach (string dirPath in Directory.GetDirectories(currentPath))
             {
                 if (new DirectoryInfo(dirPath).Name != "FindRestrictedApp" &&
                     IsAccessToFolder(dirPath))
                 {
-                    path = Path.GetFullPath(dirPath);
+                    currentPath = Path.GetFullPath(dirPath);
 
                     foreach (string filePath in Directory.GetFiles(dirPath))
                     {
@@ -133,7 +135,7 @@ namespace ThreadExamTask.ViewModels
                             }
                         }
                     }
-                    ScanRecursively();
+                    ScanRecursively(currentPath);
                 }
             }
             #endregion
@@ -141,12 +143,16 @@ namespace ThreadExamTask.ViewModels
 
         public void CopyToSpecialFolder(string filename)
         {
-            var SentFile = new FileInfo(filename);           
+            var SentFile = new FileInfo(filename);
 
             if (!SentFile.Exists)
             {
                 File.Copy(filename, specialFolder + $@"\{SentFile.Name}");
+
+                // copy file with restricted words changes
                 CopyToSpecialFolderChanged(filename, specialFolder + $@"\{SentFile.Name}");
+
+                // write file details to report file
                 WriteToReportFile(specialFolder + $@"\{SentFile.Name}");
             }
             else
@@ -166,7 +172,7 @@ namespace ThreadExamTask.ViewModels
                     // copy file with restricted words changes
                     CopyToSpecialFolderChanged(filePath, filePath2);
 
-                    // copy file details to report file
+                    // write file details to report file
                     WriteToReportFile(filePath);
                 }
                 else
@@ -179,7 +185,7 @@ namespace ThreadExamTask.ViewModels
                     // copy file with restricted words changes
                     CopyToSpecialFolderChanged(filePath, filePath2);
 
-                    // copy file details to report file
+                    // write file details to report file
                     WriteToReportFile(filePath);
                 }
             }
@@ -223,35 +229,25 @@ namespace ThreadExamTask.ViewModels
         }
 
         public void WriteToReportFile(string filename)
-        {           
-            var fi = new FileInfo(filename);
-
-            FileDetailsForReport = new List<CustomFile>();
+        {
+            var fi = new FileInfo(filename);          
 
             FileDetailsForReport.Add(new CustomFile()
             {
                 CreationTime = fi.CreationTime,
                 Fullname = fi.FullName,
-                Lenght = fi.Length
-            });
-
-            var file = new CustomFile()
-            {
-                CreationTime = fi.CreationTime,
                 Lenght = fi.Length,
-                Fullname = fi.FullName
-            };
+                Name = fi.Name
+            });
 
             try
             {
-                File.AppendAllText(reportfile, JsonConvert.SerializeObject(file));
+                File.WriteAllText(reportFile, JsonConvert.SerializeObject(FileDetailsForReport));
             }
             catch (Exception)
             {
-                
-            }
 
-            //File.WriteAllText(reportfile, content);
+            }
         }
     }
 }
