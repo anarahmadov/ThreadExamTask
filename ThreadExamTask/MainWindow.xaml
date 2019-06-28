@@ -28,9 +28,9 @@
             <WrapPanel Height="165">
                 <TextBox Width="450" Height="150" Margin="20 0 0 0" Opacity="0.7"/>
                 <Button Width="50" Height="150" Content="DONE" Margin="10 0 0 0"/>
-                <Button Opacity="0.7" Height="50" Width="50">
+                <Button Opacity="0.7" Height="50" Width="50" Margin="20 0 0 0">
                     <Button.Background>
-                        <ImageBrush ImageSource="\Users\Anar\Desktop\delete.png"/>
+                        <ImageBrush ImageSource="C:\Users\Anar\Desktop\delete.png"/>
                     </Button.Background>
                 </Button>
                 <Button Width="150" Height="50" Margin="10 0 0 0"

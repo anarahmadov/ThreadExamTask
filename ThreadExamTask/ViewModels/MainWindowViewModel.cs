@@ -21,6 +21,7 @@ namespace ThreadExamTask.ViewModels
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "";
+            
 
             if (dialog.ShowDialog() == true && dialog.FileName != null)
             {
