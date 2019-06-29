@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using ThreadExamTask.Domain;
 
 namespace ThreadExamTask.ViewModels
@@ -19,13 +18,25 @@ namespace ThreadExamTask.ViewModels
         string reportFile = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report\report.json";
         string reportFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report";
 
-        //public string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}";
+        public string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}";
         //public string path = @"\\STHQ01DC01\dfr$\Ahma_pf84\Desktop\practice";
 
-        public string path = @"C:\\Users\Anar\Desktop\test";
+        //public string path = @"C:\\Users\Anar\Desktop\test";
 
-        public MainWorks()
+        // calculate operation for progress bar
+        public double Counter { get; set; }
+        public double IncrementAmount { get; set; }
+        public void SetIncrementAmount()
         {
+            IncrementAmount = 100 / Counter;
+        }
+
+        private MainWindowViewModel viewmodel;
+
+        public MainWorks(MainWindowViewModel viewmodel)
+        {
+            this.viewmodel = viewmodel;
+
             Directory.CreateDirectory(reportFolder);
             Directory.CreateDirectory(specialFolder);
             File.Create(reportFile);
@@ -45,6 +56,100 @@ namespace ThreadExamTask.ViewModels
                     RestrictedWords.Add(arr[i]);
                 }
             }
+        }
+
+        public void GetAllFilesCount(string currentPath)
+        {
+            string allText = "";
+
+            #region Real code
+
+            //foreach (var drive in drives)
+            //{
+            //    foreach (var di in drive.RootDirectory.GetDirectories())
+            //    {
+            //        var dirpath = di.FullName;
+
+            //        if (new DirectoryInfo(dirpath).Name != "FindRestrictedApp" &&
+            //        IsAccessToFolder(dirpath))
+            //        {
+            //            path = Path.GetFullPath(di.FullName);
+
+            //            foreach (string filePath in Directory.GetFiles(dirpath))
+            //            {
+            //                if (new FileInfo(filePath).Extension == ".txt")
+            //                {
+            //                    string filename = Path.GetFullPath(filePath);
+
+            //                    // handle that thrown exception by files currently in use.
+            //                    try
+            //                    {
+            //                        allText = File.ReadAllText(filename);
+            //                    }
+            //                    catch (Exception)
+            //                    {
+            //                        continue;
+            //                    }
+
+            //                    // find from list of RestrictedWords 
+            //                    for (int i = 0; i < RestrictedWords.Count(); i++)
+            //                    {
+            //                        if (allText.Contains(RestrictedWords[i]))
+            //                        {
+            //                            CopyToSpecialFolder(filename);
+            //                            break;
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //            ScanRecursively();
+            //        }
+            //    }
+            //}
+
+            #endregion
+
+            #region test
+
+            foreach (string dirPath in Directory.GetDirectories(currentPath))
+            {
+                if (new DirectoryInfo(dirPath).Name != "FindRestrictedApp" &&
+                    IsAccessToFolder(dirPath))
+                {
+                    currentPath = Path.GetFullPath(dirPath);
+
+                    foreach (string filePath in Directory.GetFiles(dirPath))
+                    {
+                        if (new FileInfo(filePath).Extension == ".txt")
+                        {
+                            string filename = Path.GetFullPath(filePath);
+
+                            // handle that thrown exception by files currently in use.
+                            try
+                            {
+                                allText = File.ReadAllText(filename);
+                                //MessageBox.Show(allText);
+                            }
+                            catch (Exception)
+                            {
+                                continue;
+                            }
+
+                            // find from list of RestrictedWords 
+                            for (int i = 0; i < RestrictedWords.Count(); i++)
+                            {
+                                if (allText.Contains(RestrictedWords[i]))
+                                {
+                                    ++Counter;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    GetAllFilesCount(currentPath);
+                }
+            }
+            #endregion
         }
 
         public void ScanRecursively(string currentPath)
@@ -129,6 +234,7 @@ namespace ThreadExamTask.ViewModels
                             {
                                 if (allText.Contains(RestrictedWords[i]))
                                 {
+                                    viewmodel.ProgressBarValue += IncrementAmount;
                                     CopyToSpecialFolder(filename);
                                     break;
                                 }
@@ -138,6 +244,7 @@ namespace ThreadExamTask.ViewModels
                     ScanRecursively(currentPath);
                 }
             }
+
             #endregion
         }
 
@@ -145,6 +252,7 @@ namespace ThreadExamTask.ViewModels
         {
             var SentFile = new FileInfo(filename);
 
+            // Increase the progress bar value 
             if (!SentFile.Exists)
             {
                 File.Copy(filename, specialFolder + $@"\{SentFile.Name}");
@@ -230,7 +338,7 @@ namespace ThreadExamTask.ViewModels
 
         public void WriteToReportFile(string filename)
         {
-            var fi = new FileInfo(filename);          
+            var fi = new FileInfo(filename);
 
             FileDetailsForReport.Add(new CustomFile()
             {

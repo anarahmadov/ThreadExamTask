@@ -1,9 +1,11 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using ThreadExamTask.Commands;
 
 namespace ThreadExamTask.ViewModels
@@ -11,17 +13,29 @@ namespace ThreadExamTask.ViewModels
     public class MainWindowViewModel : BaseViewModel
     {
         public string ChoosenFileName { get; set; }
-        private MainWorks mainWorks = new MainWorks();
+        private MainWorks mainWorks;
         public bool IsChooseFile { get; set; }
 
-        // delete image state
-        public int State { get; set; }
+        private double progressBarValue;
+        public double ProgressBarValue
+        {
+            get
+            {
+                return progressBarValue;
+            }
+            set
+            {
+                progressBarValue = value;
+                OnProppertyChanged(new PropertyChangedEventArgs(nameof(ProgressBarValue)));
+            }
+        }
 
         public MainCommand ChooseFileCommand => new MainCommand(body =>
         {
+            mainWorks = new MainWorks(this);
+
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "";
-            
 
             if (dialog.ShowDialog() == true && dialog.FileName != null)
             {
@@ -29,22 +43,39 @@ namespace ThreadExamTask.ViewModels
                 mainWorks.PutRestrictedWordsFrom(ChoosenFileName);
                 IsChooseFile = true;
             }
-
-            State = 1;
         });
 
         public MainCommand StartCommand => new MainCommand(body =>
         {
             if (IsChooseFile)
             {
-                //CancellationTokenSource tokenSource = new CancellationTokenSource();
-                //CancellationToken token = tokenSource.Token;
-
-                //Task task = new Task(mainWorks.ScanRecursively);
-
-                Task.Run(() => mainWorks.ScanRecursively(mainWorks.path));
+                Task.Run(() => mainWorks.GetAllFilesCount(mainWorks.path)).ContinueWith((task1) =>
+                {
+                    Task.Run(() => mainWorks.SetIncrementAmount());
+                }).ContinueWith((task2) =>
+                {
+                    Task.Run(() => mainWorks.ScanRecursively(mainWorks.path));
+                });
             }
             else MessageBox.Show("There are no restricted words");
+        });
+
+        [Obsolete]
+        public MainCommand PauseCommand => new MainCommand((body) =>
+        {
+            Thread.CurrentThread.Suspend();
+        });
+
+        [Obsolete]
+        public MainCommand ResumeCommand => new MainCommand((body) =>
+        {
+            Thread.CurrentThread.Resume();
+        });
+
+        [Obsolete]
+        public MainCommand StopCommand => new MainCommand((body) =>
+        {
+            Thread.CurrentThread.Abort();
         });
     }
 }
