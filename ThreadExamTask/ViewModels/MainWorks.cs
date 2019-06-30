@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThreadExamTask.Domain;
 
@@ -13,6 +15,8 @@ namespace ThreadExamTask.ViewModels
         private DriveInfo[] drives = DriveInfo.GetDrives();
 
         public List<CustomFile> FileDetailsForReport { get; set; }
+
+        public List<string> ContainsRestrictedWordFiles { get; set; }
 
         string specialFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp";
         string reportFile = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}" + @"\FindRestrictedApp\report\report.json";
@@ -149,6 +153,7 @@ namespace ThreadExamTask.ViewModels
                     GetAllFilesCount(currentPath);
                 }
             }
+            SetIncrementAmount();
             #endregion
         }
 
@@ -235,7 +240,7 @@ namespace ThreadExamTask.ViewModels
                                 if (allText.Contains(RestrictedWords[i]))
                                 {
                                     viewmodel.ProgressBarValue += IncrementAmount;
-                                    CopyToSpecialFolder(filename);
+                                    ContainsRestrictedWordFiles.Add(filename);
                                     break;
                                 }
                             }
@@ -248,53 +253,63 @@ namespace ThreadExamTask.ViewModels
             #endregion
         }
 
-        public void CopyToSpecialFolder(string filename)
+        public void CopyToSpecialFolder()
         {
-            var SentFile = new FileInfo(filename);
+            ContainsRestrictedWordFiles = new List<string>();
 
-            // Increase the progress bar value 
-            if (!SentFile.Exists)
+            if (ContainsRestrictedWordFiles.Count == 0)
             {
-                File.Copy(filename, specialFolder + $@"\{SentFile.Name}");
-
-                // copy file with restricted words changes
-                CopyToSpecialFolderChanged(filename, specialFolder + $@"\{SentFile.Name}");
-
-                // write file details to report file
-                WriteToReportFile(specialFolder + $@"\{SentFile.Name}");
+               // Task.Wa()
             }
-            else
+
+            foreach (var filename in ContainsRestrictedWordFiles)
             {
-                var fileFullPath = specialFolder +
-                $@"\{SentFile.Name}";
+                var SentFile = new FileInfo(filename);
 
-                if (SentFile.Extension != string.Empty)
+                // Increase the progress bar value 
+                if (!SentFile.Exists)
                 {
-                    var twopart = fileFullPath.Split('.');
-
-                    var filePath = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")}).{twopart.Last()}";
-                    File.Copy(filename, filePath);
-
-                    var filePath2 = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")})(Copy).{twopart.Last()}";
+                    File.Copy(filename, specialFolder + $@"\{SentFile.Name}");
 
                     // copy file with restricted words changes
-                    CopyToSpecialFolderChanged(filePath, filePath2);
+                    CopyToSpecialFolderChanged(filename, specialFolder + $@"\{SentFile.Name}");
 
                     // write file details to report file
-                    WriteToReportFile(filePath);
+                    WriteToReportFile(specialFolder + $@"\{SentFile.Name}");
                 }
                 else
                 {
-                    var filePath = $"{filename}({DateTime.UtcNow.ToString("ss.fff")})";
-                    File.Copy(filename, filePath);
+                    var fileFullPath = specialFolder +
+                    $@"\{SentFile.Name}";
 
-                    var filePath2 = $"{filename}({DateTime.UtcNow.ToString("ss.fff")})(Copy)";
+                    if (SentFile.Extension != string.Empty)
+                    {
+                        var twopart = fileFullPath.Split('.');
 
-                    // copy file with restricted words changes
-                    CopyToSpecialFolderChanged(filePath, filePath2);
+                        var filePath = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")}).{twopart.Last()}";
+                        File.Copy(filename, filePath);
 
-                    // write file details to report file
-                    WriteToReportFile(filePath);
+                        var filePath2 = $"{twopart[0]}({DateTime.UtcNow.ToString("ss.fff")})(Copy).{twopart.Last()}";
+
+                        // copy file with restricted words changes
+                        CopyToSpecialFolderChanged(filePath, filePath2);
+
+                        // write file details to report file
+                        WriteToReportFile(filePath);
+                    }
+                    else
+                    {
+                        var filePath = $"{filename}({DateTime.UtcNow.ToString("ss.fff")})";
+                        File.Copy(filename, filePath);
+
+                        var filePath2 = $"{filename}({DateTime.UtcNow.ToString("ss.fff")})(Copy)";
+
+                        // copy file with restricted words changes
+                        CopyToSpecialFolderChanged(filePath, filePath2);
+
+                        // write file details to report file
+                        WriteToReportFile(filePath);
+                    }
                 }
             }
         }

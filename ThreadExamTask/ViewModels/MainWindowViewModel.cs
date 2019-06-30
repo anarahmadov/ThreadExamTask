@@ -49,15 +49,14 @@ namespace ThreadExamTask.ViewModels
         {
             if (IsChooseFile)
             {
-                Task.Run(() => mainWorks.GetAllFilesCount(mainWorks.path)).ContinueWith((task1) =>
-                {
-                    Task.Run(() => mainWorks.SetIncrementAmount());
-                }).ContinueWith((task2) =>
+                Task.Run(() => mainWorks.GetAllFilesCount(mainWorks.path))
+                .ContinueWith((task) =>
                 {
                     Task.Run(() => mainWorks.ScanRecursively(mainWorks.path));
+                    Task.Run(() => mainWorks.CopyToSpecialFolder());
                 });
             }
-            else MessageBox.Show("There are no restricted words");
+            else MessageBox.Show("There is no restricted words file.");
         });
 
         [Obsolete]
