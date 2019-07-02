@@ -1,11 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.ComponentModel;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using ThreadExamTask.Commands;
 
 namespace ThreadExamTask.ViewModels

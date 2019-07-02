@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThreadExamTask.Domain;
 
@@ -34,6 +33,8 @@ namespace ThreadExamTask.ViewModels
         {
             IncrementAmount = 100 / Counter;
         }
+
+        AutoResetEvent are = new AutoResetEvent(false);
 
         private MainWindowViewModel viewmodel;
 
@@ -241,6 +242,7 @@ namespace ThreadExamTask.ViewModels
                                 {
                                     viewmodel.ProgressBarValue += IncrementAmount;
                                     ContainsRestrictedWordFiles.Add(filename);
+                                    are.Set();
                                     break;
                                 }
                             }
@@ -257,10 +259,8 @@ namespace ThreadExamTask.ViewModels
         {
             ContainsRestrictedWordFiles = new List<string>();
 
-            if (ContainsRestrictedWordFiles.Count == 0)
-            {
-               // Task.Wa()
-            }
+            // wait for another task finished its work.
+            are.WaitOne();
 
             foreach (var filename in ContainsRestrictedWordFiles)
             {
@@ -311,6 +311,9 @@ namespace ThreadExamTask.ViewModels
                         WriteToReportFile(filePath);
                     }
                 }
+
+                // wait for another task finished its work.
+                are.WaitOne();
             }
         }
 
